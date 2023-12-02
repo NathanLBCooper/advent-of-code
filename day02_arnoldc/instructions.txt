@@ -1,0 +1,10 @@
+Get tooling:
+curl --output "./ArnoldC.jar" "http://lhartikk.github.io/ArnoldC.jar"
+
+Compile:
+java -jar ArnoldC.jar main.arnoldc
+
+Run:
+java main
+
+Then enter all the date manually into the screen prompts (sorry language doesn't do io and doesn't have collections)
