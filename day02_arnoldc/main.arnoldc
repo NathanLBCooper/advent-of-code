@@ -191,9 +191,24 @@ LISTEN TO ME VERY CAREFULLY checkColorPossibleFUNC
     HEY CHRISTMAS TREE possible
     YOU SET US UP @I LIED
 
-    GET TO THE CHOPPER possible
+    HEY CHRISTMAS TREE bagBigger
+    YOU SET US UP @I LIED
+    GET TO THE CHOPPER bagBigger
     HERE IS MY INVITATION bagSizeForColor
     LET OFF SOME STEAM BENNET roundSizeForColor
+    ENOUGH TALK
+
+    HEY CHRISTMAS TREE bagEqual
+    YOU SET US UP @I LIED
+    GET TO THE CHOPPER bagEqual
+    HERE IS MY INVITATION bagSizeForColor
+    YOU ARE NOT YOU YOU ARE ME roundSizeForColor
+    ENOUGH TALK
+
+    HEY CHRISTMAS TREE possible
+    YOU SET US UP @I LIED
+    GET TO THE CHOPPER bagBigger
+    CONSIDER THAT A DIVORCE bagEqual
     ENOUGH TALK
 
     I'LL BE BACK possible
