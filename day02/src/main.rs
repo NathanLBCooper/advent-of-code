@@ -1,17 +1,20 @@
+use crate::block_game::*;
+use common::file;
+
 fn main() {
     let file = String::from("./input.txt");
     let lines = file::read_lines(&file).unwrap();
 
-    let games = block_game::deserialize_games(&lines);
+    let games = deserialize_games(&lines);
 
-    let bag = block_game::Bag {
+    let bag = Bag {
         red: 12,
         green: 13,
         blue: 14,
     };
-    println!("{}", block_game::sum_of_ids_of_possible_games(&bag, &games));
+    println!("{}", sum_of_ids_of_possible_games(&bag, &games));
 
-    println!("{}", block_game::sum_of_minimal_bag_powers(&games));
+    println!("{}", sum_of_minimal_bag_powers(&games));
 }
 
 mod block_game {
@@ -127,7 +130,8 @@ mod block_game {
 
 #[cfg(test)]
 mod tests {
-    use crate::{block_game, file};
+    use crate::block_game;
+    use common::file;
 
     #[test]
     fn can_find_sum_of_possible_game_ids_for_example_file() {
@@ -195,50 +199,5 @@ mod tests {
         assert_eq!(round.blue, 1);
         assert_eq!(round.green, 2);
         assert_eq!(round.red, 0);
-    }
-}
-
-// todo repetative
-mod file {
-    use crate::core::Error;
-    use crate::core::Result;
-    use std::fs::read_to_string;
-
-    pub fn read_lines(filename: &str) -> Result<Vec<String>> {
-        return match read_to_string(filename) {
-            Ok(s) => return Ok(s.lines().map(String::from).collect()),
-            Err(_) => Err(Error::new("can't read file")),
-        };
-    }
-}
-
-// todo repetative
-mod core {
-    use std::{fmt::Debug, result};
-
-    pub type Result<T> = result::Result<T, Error>;
-
-    pub struct Error {
-        reason: String,
-    }
-
-    impl Error {
-        pub fn new(reason: &str) -> Self {
-            return Self {
-                reason: String::from(reason),
-            };
-        }
-
-        pub fn get_reason(&self) -> &String {
-            return &self.reason;
-        }
-    }
-
-    impl Debug for Error {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.debug_struct("Error")
-                .field("reason", &self.reason)
-                .finish()
-        }
     }
 }

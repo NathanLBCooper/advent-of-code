@@ -1,2 +1,5 @@
 */target
-ArnoldC.jar
+target
+
+arnoldc/*/ArnoldC.jar
+arnoldc/*/*.class

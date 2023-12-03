@@ -1,4 +1,4 @@
-use crate::calibration::calculate_sum_of_calibration_document;
+use crate::calibration::*;
 
 fn main() {
     let result = calculate_sum_of_calibration_document(&String::from("./calibration.txt"));
@@ -14,8 +14,8 @@ fn main() {
 }
 
 mod calibration {
-    use crate::core::Error;
-    use crate::core::Result;
+    use common::core::Error;
+    use common::core::Result;
     use std::fs::read_to_string;
 
     pub fn calculate_sum_of_calibration_document(filename: &str) -> Result<i32> {
@@ -140,35 +140,5 @@ mod tests {
 
         assert_eq!(result.is_err(), false);
         assert_eq!(result.unwrap(), 281);
-    }
-}
-
-mod core {
-    use std::{fmt::Debug, result};
-
-    pub type Result<T> = result::Result<T, Error>;
-
-    pub struct Error {
-        reason: String,
-    }
-
-    impl Error {
-        pub fn new(reason: &str) -> Self {
-            return Self {
-                reason: String::from(reason),
-            };
-        }
-
-        pub fn get_reason(&self) -> &String {
-            return &self.reason;
-        }
-    }
-
-    impl Debug for Error {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.debug_struct("Error")
-                .field("reason", &self.reason)
-                .finish()
-        }
     }
 }
