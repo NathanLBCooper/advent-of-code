@@ -85,6 +85,47 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}/day02"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'day03'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--manifest-path",
+                    "${workspaceFolder}/day03/Cargo.toml", // cwd doesn't appear to work, but this does
+                    "--bin=day03",
+                    "--package=day03"
+                ],
+                "filter": {
+                    "name": "day03",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/day03"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'day03'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--manifest-path",
+                    "${workspaceFolder}/day03/Cargo.toml", // cwd doesn't appear to work, but this does
+                    "--bin=day03",
+                    "--package=day03"
+                ],
+                "filter": {
+                    "name": "day03",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/day03"
         }
     ]
 }
