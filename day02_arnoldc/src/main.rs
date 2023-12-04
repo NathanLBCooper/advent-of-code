@@ -18,11 +18,16 @@ fn main() {
     // console_stdin
     //     .write(b"java -jar ArnoldC.jar main.arnoldc \r\n")
     //     .unwrap();
+    // console_stdin
+    //     .write(b"java -jar ArnoldC.jar part_2.arnoldc \r\n")
+    //     .unwrap();
 
-    console_stdin.write(b"java main  \r\n").unwrap();
+    //console_stdin.write(b"java main  \r\n").unwrap(); // part 1
+    console_stdin.write(b"java part_2  \r\n").unwrap(); // part 2
     thread::sleep(time::Duration::from_millis(1000));
 
     let inputs = get_arnolds_input("./input.txt");
+    //let inputs = get_arnolds_input("./example.txt");
 
     for input in inputs {
         thread::sleep(time::Duration::from_millis(50));
