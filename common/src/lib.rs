@@ -26,6 +26,12 @@ pub mod core {
                 .finish()
         }
     }
+
+    pub fn into_arr<T, const N: usize>(v: Vec<T>) -> [T; N] {
+        v.try_into().unwrap_or_else(|v: Vec<T>| {
+            panic!("Expected a Vec of length {} but it was {}", N, v.len())
+        })
+    }
 }
 
 pub mod file {
@@ -38,5 +44,41 @@ pub mod file {
             Ok(s) => return Ok(s.lines().map(String::from).collect()),
             Err(_) => Err(Error::new("can't read file")),
         };
+    }
+}
+
+pub mod parsing {
+    use std::fmt::Debug;
+    use std::str::FromStr;
+
+    pub fn parse_numbers<T>(numbers_str: &str) -> Vec<T>
+    where
+        T: FromStr,
+        <T as FromStr>::Err: Debug,
+    {
+        numbers_str
+            .trim()
+            .split_whitespace()
+            .map(|num| num.parse().unwrap())
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod parsing_tests {
+    use crate::parsing::*;
+
+    #[test]
+    fn can_parse_scratch_card_line() {
+        let line = "79 14 55 13";
+
+        let numbers = parse_numbers::<i32>(&line);
+
+        assert_eq!(numbers.iter().count(), 4);
+        let mut iter = numbers.iter();
+        assert_eq!(iter.next().unwrap().clone(), 79);
+        assert_eq!(iter.next().unwrap().clone(), 14);
+        assert_eq!(iter.next().unwrap().clone(), 55);
+        assert_eq!(iter.next().unwrap().clone(), 13);
     }
 }

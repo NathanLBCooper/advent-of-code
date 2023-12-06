@@ -15,6 +15,7 @@ fn main() {
 mod gambling {
     use regex::Regex;
     use std::{
+        arch::asm,
         collections::{HashMap, HashSet},
         iter::Sum,
         ops::Add,
@@ -143,6 +144,16 @@ mod gambling {
         let digits = &card_name_str[match_.start()..match_.end()];
         digits.parse::<i32>().unwrap()
     }
+
+    fn parse_id_2(card_name_str: &str) -> i32 {
+        let bytes = card_name_str.as_bytes();
+        let mut id_buf = [0_u8; 12];
+        unsafe {
+            asm!("nop");
+        }
+
+        todo!();
+    }
 }
 
 #[cfg(test)]
@@ -215,11 +226,4 @@ mod stuff {
         }
     }
     impl<'a, T> Eq for RefEquality<'a, T> {}
-
-    // // I was modelling scratchcards with fixed sizes
-    // fn into_arr<T, const N: usize>(v: Vec<T>) -> [T; N] {
-    //     v.try_into().unwrap_or_else(|v: Vec<T>| {
-    //         panic!("Expected a Vec of length {} but it was {}", N, v.len())
-    //     })
-    // }
 }

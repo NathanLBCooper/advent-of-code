@@ -7,125 +7,43 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'day01'",
+            "name": "Debug executable 'day05'",
             "cargo": {
                 "args": [
                     "build",
                     "--manifest-path",
-                    "${workspaceFolder}/day01/Cargo.toml", // cwd doesn't appear to work, but this does
-                    "--bin=day01",
-                    "--package=day01"
+                    "${workspaceFolder}/day05/Cargo.toml", // cwd doesn't appear to work, but this does
+                    "--bin=day05",
+                    "--package=day05"
                 ],
                 "filter": {
-                    "name": "day01",
+                    "name": "day05",
                     "kind": "bin"
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}/day01"
+            "cwd": "${workspaceFolder}/day05"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'day01'",
+            "name": "Debug unit tests in executable 'day05'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--manifest-path",
-                    "${workspaceFolder}/day01/Cargo.toml", // cwd doesn't appear to work, but this does
-                    "--bin=day01",
-                    "--package=day01"
+                    "${workspaceFolder}/day05/Cargo.toml", // cwd doesn't appear to work, but this does
+                    "--bin=day05",
+                    "--package=day05"
                 ],
                 "filter": {
-                    "name": "day01",
+                    "name": "day05",
                     "kind": "bin"
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}/day01"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug executable 'day02'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--manifest-path",
-                    "${workspaceFolder}/day02/Cargo.toml", // cwd doesn't appear to work, but this does
-                    "--bin=day02",
-                    "--package=day02"
-                ],
-                "filter": {
-                    "name": "day02",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}/day02"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'day02'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--manifest-path",
-                    "${workspaceFolder}/day02/Cargo.toml", // cwd doesn't appear to work, but this does
-                    "--bin=day02",
-                    "--package=day02"
-                ],
-                "filter": {
-                    "name": "day02",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}/day02"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug executable 'day03'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--manifest-path",
-                    "${workspaceFolder}/day03/Cargo.toml", // cwd doesn't appear to work, but this does
-                    "--bin=day03",
-                    "--package=day03"
-                ],
-                "filter": {
-                    "name": "day03",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}/day03"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'day03'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--manifest-path",
-                    "${workspaceFolder}/day03/Cargo.toml", // cwd doesn't appear to work, but this does
-                    "--bin=day03",
-                    "--package=day03"
-                ],
-                "filter": {
-                    "name": "day03",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}/day03"
+            "cwd": "${workspaceFolder}/day05"
         }
     ]
 }
