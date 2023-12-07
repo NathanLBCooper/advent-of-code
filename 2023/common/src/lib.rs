@@ -32,6 +32,18 @@ pub mod core {
             panic!("Expected a Vec of length {} but it was {}", N, v.len())
         })
     }
+
+    pub trait IntoArr<T> {
+        fn into_arr<const N: usize>(self) -> [T; N];
+    }
+
+    impl<T> IntoArr<T> for Vec<T> {
+        fn into_arr<const N: usize>(self) -> [T; N] {
+            self.try_into().unwrap_or_else(|v: Vec<T>| {
+                panic!("Expected a Vec of length {} but it was {}", N, v.len())
+            })
+        }
+    }
 }
 
 pub mod file {
