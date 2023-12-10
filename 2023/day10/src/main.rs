@@ -17,7 +17,6 @@ fn main() {
 
 mod pipe_maze {
     use std::{
-        clone,
         collections::{HashMap, HashSet},
         ops::Add,
     };
@@ -34,98 +33,84 @@ mod pipe_maze {
 
     impl Maze {
         pub fn distance_to_pipe_furthest_from_start(&self) -> i32 {
-            let mut visited: HashSet<Coordinate> = HashSet::new();
             let start = self
                 .pipes
                 .iter()
                 .find(|(c, p)| **p == Pipe::Start)
-                .map(|(c, p)| Path {
-                    end: (c.clone(), p.clone()),
-                    length: 0,
-                })
+                .map(|(c, p)| (c.clone(), p.clone()))
                 .unwrap();
 
-            let mut heads = vec![start];
-            loop {
-                //println!("loop {:?}", heads);
+            let paths = self.search_for_paths(start);
 
-                let mut next_heads: Vec<Path> = vec![];
-                for head in heads.iter() {
-                    let next = self.take_step(&head, &mut visited);
-                    if next.is_empty() {
+            paths.iter().map(|p| p.length).max().unwrap()
+        }
+
+        fn search_for_paths(&self, start: (Coordinate, Pipe)) -> Vec<Path> {
+            let mut visited: HashSet<Coordinate> = HashSet::new();
+
+            let mut search_level = vec![Path {
+                end: (start.0.clone(), start.1.clone()),
+                length: 0,
+            }];
+
+            // Do breadth first search of all possible paths, until unable to make progress into un-visited coordinate
+            loop {
+                let mut next_level: Vec<Path> = vec![];
+                for path in search_level.iter() {
+                    let next_paths: Vec<Path> = self.continue_path_one_step(path, &mut visited);
+                    if next_paths.is_empty() {
                         continue;
                     }
 
-                    next_heads.extend(next);
+                    next_level.extend(next_paths);
                 }
 
-                if next_heads.is_empty() {
+                if next_level.is_empty() {
                     break;
                 }
 
-                heads = next_heads;
+                search_level = next_level;
             }
 
-            heads.iter().map(|p| p.length).max().unwrap()
+            search_level
         }
 
-        fn take_step(&self, head: &Path, visited: &mut HashSet<Coordinate>) -> Vec<Path> {
-            let directions_from_current = directions(&head.end.1);
-            //println!("directions_from_current {:?}", directions_from_current);
-
-            let adjacent = directions_from_current.iter().filter_map(|d| {
-                let accessable: Coordinate = d + &head.end.0;
+        fn continue_path_one_step(
+            &self,
+            path: &Path,
+            visited: &mut HashSet<Coordinate>,
+        ) -> Vec<Path> {
+            let directions_from_current = directions(&path.end.1);
+            let accessable_coordinates = directions_from_current.iter().filter_map(|direction| {
+                let accessable: Coordinate = direction + &path.end.0;
                 match self.pipes.get(&accessable) {
-                    Some(p) => Some((accessable, p.clone())),
+                    Some(p) => Some((accessable.clone(), p.clone())),
                     None => None,
                 }
             });
 
-            // println!(
-            //     "adjacent {:?}",
-            //     adjacent.clone().collect::<Vec<(Coordinate, Pipe)>>()
-            // );
-
-            let connected = adjacent.filter_map(|(c, p)| {
-                let directions_from_adjacent = directions(&p); // todo double work
-                for d in directions_from_adjacent {
-                    if &c + &d == head.end.0 {
-                        return Some((c.clone(), p.clone()));
-                    }
-                }
-
-                return None;
-            });
-
-            // println!(
-            //     "connected {:?}",
-            //     connected.clone().collect::<Vec<(Coordinate, Pipe)>>()
-            // );
-
-            let unvisited = connected
-                .filter_map(|(c, p)| match visited.contains(&c) {
-                    true => None,
-                    false => Some((c.clone(), p.clone())),
+            let next_coordinates = accessable_coordinates
+                .filter(|(c, p)| {
+                    let directions_from_adjacent = directions(&p); // todo double work. Actually more than double. Optimize by storing against enum somehow?
+                    let is_connected = directions_from_adjacent.iter().any(|d| c + d == path.end.0);
+                    is_connected
                 })
+                .filter(|(c, _)| !visited.contains(&c))
                 .collect::<Vec<(Coordinate, Pipe)>>();
 
-            //println!("unvisited {:?}", unvisited);
-
-            let next: Vec<Path> = unvisited
+            let next_paths: Vec<Path> = next_coordinates
                 .iter()
                 .map(|(c, p)| {
                     let path = Path {
                         end: (c.clone(), p.clone()),
-                        length: head.length + 1,
+                        length: path.length + 1,
                     };
                     visited.insert(path.end.0.clone());
                     path
                 })
                 .collect();
 
-            //println!("next {:?}", next);
-
-            next
+            next_paths
         }
     }
 
