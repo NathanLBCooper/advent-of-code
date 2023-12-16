@@ -20,9 +20,8 @@ mod astronomy {
 
     use self::image::Image;
 
-    pub fn sum_distances_between_galaxy_pairs(image: &Image, expansion_factor: i32) -> i32 {
-        let expanded = image.expand(expansion_factor);
-        let galaxies = expanded.galaxies();
+    pub fn sum_distances_between_galaxy_pairs(image: &Image, expansion_factor: i32) -> i64 {
+        let galaxies = image.galaxies(expansion_factor);
 
         let pairs = find_pairs(&galaxies);
 
@@ -50,29 +49,25 @@ mod astronomy {
         use crate::geometry::Coordinate;
 
         const GALAXY: char = '#';
-        const EMPTY_SPACE: char = '.';
+        //const EMPTY_SPACE: char = '.';
 
         #[derive(Debug)]
         pub struct Image {
             pixels: Vec<Vec<char>>,
-            width: usize,
         }
 
         impl Image {
             pub fn new(lines: &[&str]) -> Image {
-                Self::from_pixels(lines.iter().map(|l| l.chars().collect()).collect())
+                Image {
+                    pixels: lines.iter().map(|l| l.chars().collect()).collect(),
+                }
             }
 
-            fn from_pixels(pixels: Vec<Vec<char>>) -> Image {
-                let width = match pixels.first() {
-                    Some(l) => l.len(),
-                    None => 0,
-                };
+            pub fn galaxies(&self, expansion_factor: i32) -> Vec<Coordinate> {
+                if expansion_factor < 1 {
+                    panic!("expansion factor must be 1 or more")
+                }
 
-                Image { pixels, width }
-            }
-
-            pub fn expand(&self, factor: i32) -> Image {
                 let mut non_empty_rows = HashSet::<usize>::new();
                 let mut non_empty_columns = HashSet::<usize>::new();
                 for (y, line) in self.pixels.iter().enumerate() {
@@ -84,45 +79,33 @@ mod astronomy {
                     }
                 }
 
-                let mut expanded = Vec::<Vec<char>>::new();
-                for (y, line) in self.pixels.iter().enumerate() {
-                    let mut new_line = Vec::<char>::new();
-                    for (x, pixel) in line.iter().enumerate() {
-                        match non_empty_columns.contains(&x) {
-                            true => new_line.push(pixel.clone()),
-                            false => {
-                                for _ in 0..factor {
-                                    new_line.push(pixel.clone());
-                                }
-                            }
-                        }
-                    }
-
-                    match non_empty_rows.contains(&y) {
-                        true => expanded.push(new_line),
-                        false => {
-                            for _ in 1..factor {
-                                expanded.push(new_line.clone());
-                            }
-                            expanded.push(new_line);
-                        }
-                    }
-                }
-
-                Self::from_pixels(expanded)
-            }
-
-            pub fn galaxies(&self) -> Vec<Coordinate> {
                 let mut galaxies = Vec::<Coordinate>::new();
+
+                let mut y_expanded: i64 = 0;
                 for (y, line) in self.pixels.iter().enumerate() {
+                    if !non_empty_rows.contains(&y) {
+                        y_expanded += expansion_factor as i64;
+                        continue;
+                    }
+
+                    let mut x_expanded: i64 = 0;
                     for (x, char) in line.iter().enumerate() {
+                        if !non_empty_columns.contains(&x) {
+                            x_expanded += expansion_factor as i64;
+                            continue;
+                        }
+
                         if *char == GALAXY {
                             galaxies.push(Coordinate {
-                                x: x as i32,
-                                y: y as i32,
+                                x: x_expanded,
+                                y: y_expanded,
                             })
                         }
+
+                        x_expanded += 1;
                     }
+
+                    y_expanded += 1;
                 }
 
                 galaxies
@@ -135,16 +118,16 @@ mod astronomy {
 mod geometry {
     #[derive(PartialEq, Eq, Hash, Clone, Debug)]
     pub struct Coordinate {
-        pub x: i32,
-        pub y: i32,
+        pub x: i64,
+        pub y: i64,
     }
 
-    pub fn calculate_path_distance(left: &Coordinate, right: &Coordinate) -> i32 {
-        let x_distance = i32::abs(right.x - left.x);
-        let y_distance = i32::abs(right.y - left.y);
+    pub fn calculate_path_distance(left: &Coordinate, right: &Coordinate) -> i64 {
+        let x_distance = i64::abs(right.x - left.x);
+        let y_distance = i64::abs(right.y - left.y);
 
-        // let non_diagonal_component = i32::abs(x_distance - y_distance);
-        // let diagonal_component = i32::max(x_distance, y_distance) - non_diagonal_component;
+        // let non_diagonal_component = i64::abs(x_distance - y_distance);
+        // let diagonal_component = i64::max(x_distance, y_distance) - non_diagonal_component;
 
         // non_diagonal_component + diagonal_component
 
@@ -192,75 +175,6 @@ mod tests {
     }
 
     #[test]
-    fn image_can_expand() {
-        let expected_lines = vec![
-            "....#........",
-            ".........#...",
-            "#............",
-            ".............",
-            ".............",
-            "........#....",
-            ".#...........",
-            "............#",
-            ".............",
-            ".............",
-            ".........#...",
-            "#....#.......",
-        ];
-
-        let image = Image::new(IMAGE);
-        let expected = Image::new(&expected_lines);
-
-        let expanded = image.expand(2);
-
-        assert_eq!(format!("{:?}", expanded), format!("{:?}", expected));
-    }
-
-    #[test]
-    fn image_can_expand_by_factor() {
-        let factor = 4;
-        let annotated_expected_lines = vec![
-            ". . | 1 2 3 # . | 1 2 3 . . | 1 2 3 .",
-            ". . | 1 2 3 . . | 1 2 3 . # | 1 2 3 .",
-            "# . | 1 2 3 . . | 1 2 3 . . | 1 2 3 .",
-            "- - | 1 2 3 - - | 1 2 3 - - | 1 2 3 -",
-            "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1",
-            "2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2",
-            "3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3",
-            ". . | 1 2 3 . . | 1 2 3 # . | 1 2 3 .",
-            ". # | 1 2 3 . . | 1 2 3 . . | 1 2 3 .",
-            ". . | 1 2 3 . . | 1 2 3 . . | 1 2 3 #",
-            "- - | 1 2 3 - - | 1 2 3 - - | 1 2 3 -",
-            "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1",
-            "2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2",
-            "3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3",
-            ". . | 1 2 3 . . | 1 2 3 . # | 1 2 3 .",
-            "# . | 1 2 3 . # | 1 2 3 . . | 1 2 3 .",
-        ];
-
-        let expected_lines: Vec<String> = annotated_expected_lines
-            .iter()
-            .map(|s| {
-                s.chars()
-                    .filter(|c| !c.is_whitespace())
-                    .map(|c| match c {
-                        '#' => '#',
-                        _ => '.',
-                    })
-                    .collect()
-            })
-            .collect();
-        let expected_lines_ref: Vec<&str> = expected_lines.iter().map(|x| x.as_ref()).collect();
-
-        let image = Image::new(IMAGE);
-        let expected = Image::new(&expected_lines_ref);
-
-        let expanded = image.expand(factor);
-
-        assert_eq!(format!("{:?}", expanded), format!("{:?}", expected));
-    }
-
-    #[test]
     fn can_get_galaxies() {
         let image_lines = vec!["...#......", ".......#..", "#........."];
         let image = Image::new(&image_lines);
@@ -270,9 +184,46 @@ mod tests {
             Coordinate { y: 2, x: 0 },
         ];
 
-        let galaxies = image.galaxies();
+        let galaxies = image.galaxies(1);
 
         assert_eq!(galaxies, expected);
+    }
+
+    #[test]
+    fn can_get_galaxies_with_expansion() {
+        #[rustfmt::skip]
+        let example = vec![
+            ". . # . . . . . .",
+            ". . . . . . # . .",
+            ". . . . . . . . .",
+            "# . . . . . . . .",
+            ];
+
+        let lines = remove_whitespace(&example);
+        let lines_ref: Vec<&str> = lines.iter().map(|x| x.as_ref()).collect();
+
+        println!("{:?}", lines_ref);
+
+        let image = Image::new(&lines_ref);
+        let expected = vec![
+            Coordinate { y: 0, x: 2 + 9 },
+            Coordinate {
+                y: 1,
+                x: 6 + (9 * 4),
+            },
+            Coordinate { y: 3 + 9, x: 0 },
+        ];
+
+        let galaxies = image.galaxies(10);
+
+        assert_eq!(galaxies, expected);
+    }
+
+    fn remove_whitespace(lines: &[&str]) -> Vec<String> {
+        lines
+            .iter()
+            .map(|s| s.chars().filter(|c| !c.is_whitespace()).collect())
+            .collect()
     }
 
     #[test]
@@ -304,7 +255,7 @@ mod geometry_tests {
     #[test_case(Coordinate { x: 2, y: 0 }, Coordinate { x: 1, y: 0 }, 1; "1 left")]
     #[test_case(Coordinate { x: 0, y: 0 }, Coordinate { x: 1, y: 1 }, 2; "1 down and right")]
     #[test_case(Coordinate { x: 2, y: 2 }, Coordinate { x: 0, y: 0 }, 4; "2 up and left")]
-    fn can_get_distance_between_coordinates(left: Coordinate, right: Coordinate, expected: i32) {
+    fn can_get_distance_between_coordinates(left: Coordinate, right: Coordinate, expected: i64) {
         let distance = calculate_path_distance(&left, &right);
 
         assert_eq!(distance, expected);
