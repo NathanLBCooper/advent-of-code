@@ -1,4 +1,4 @@
-use crate::astronomy::{image::Image, part_1};
+use crate::astronomy::{image::Image, sum_distances_between_galaxy_pairs};
 use common::file;
 
 fn main() {
@@ -8,7 +8,11 @@ fn main() {
 
     let image = Image::new(&v);
 
-    println!("part 1: {}", part_1(&image));
+    println!("part 1: {}", sum_distances_between_galaxy_pairs(&image, 1));
+    println!(
+        "part 2: {}",
+        sum_distances_between_galaxy_pairs(&image, 1_000_000)
+    );
 }
 
 mod astronomy {
@@ -16,8 +20,8 @@ mod astronomy {
 
     use self::image::Image;
 
-    pub fn part_1(image: &Image) -> i32 {
-        let expanded = image.expand();
+    pub fn sum_distances_between_galaxy_pairs(image: &Image, expansion_factor: i32) -> i32 {
+        let expanded = image.expand(expansion_factor);
         let galaxies = expanded.galaxies();
 
         let pairs = find_pairs(&galaxies);
@@ -68,7 +72,7 @@ mod astronomy {
                 Image { pixels, width }
             }
 
-            pub fn expand(&self) -> Image {
+            pub fn expand(&self, factor: i32) -> Image {
                 let mut non_empty_rows = HashSet::<usize>::new();
                 let mut non_empty_columns = HashSet::<usize>::new();
                 for (y, line) in self.pixels.iter().enumerate() {
@@ -87,8 +91,9 @@ mod astronomy {
                         match non_empty_columns.contains(&x) {
                             true => new_line.push(pixel.clone()),
                             false => {
-                                new_line.push(pixel.clone());
-                                new_line.push(pixel.clone());
+                                for _ in 0..factor {
+                                    new_line.push(pixel.clone());
+                                }
                             }
                         }
                     }
@@ -96,7 +101,9 @@ mod astronomy {
                     match non_empty_rows.contains(&y) {
                         true => expanded.push(new_line),
                         false => {
-                            expanded.push(new_line.clone());
+                            for _ in 1..factor {
+                                expanded.push(new_line.clone());
+                            }
                             expanded.push(new_line);
                         }
                     }
@@ -148,49 +155,44 @@ mod geometry {
 #[cfg(test)]
 mod tests {
     use crate::{
-        astronomy::{find_pairs, image::Image, part_1},
+        astronomy::{find_pairs, image::Image, sum_distances_between_galaxy_pairs},
         geometry::Coordinate,
     };
 
+    #[rustfmt::skip]
+    const IMAGE: &[&str] = &[
+        /*  v  v  v  */
+        "...#......",
+        ".......#..",
+        "#.........",
+    /*>*/"..........",/*<*/
+        "......#...",
+        ".#........",
+        ".........#",
+    /*>*/"..........",/*<*/
+        ".......#..",
+        "#...#.....",
+        /*   ^  ^  ^ */
+    ];
+
     #[test]
     fn part_1_works() {
-        let image = Image::new(&vec![
-            "...#......",
-            ".......#..",
-            "#.........",
-            "..........",
-            "......#...",
-            ".#........",
-            ".........#",
-            "..........",
-            ".......#..",
-            "#...#.....",
-        ]);
-
-        let answer = part_1(&image);
+        let image = Image::new(IMAGE);
+        let answer = sum_distances_between_galaxy_pairs(&image, 2);
 
         assert_eq!(answer, 374);
     }
 
     #[test]
-    fn image_can_expand() {
-        #[rustfmt::skip]
-        let image_lines = vec![
-          /*  v  v  v  */
-            "...#......",
-            ".......#..",
-            "#.........",
-       /*>*/"..........",/*<*/
-            "......#...",
-            ".#........",
-            ".........#",
-       /*>*/"..........",/*<*/
-            ".......#..",
-            "#...#.....",
-           /*   ^  ^  ^ */
-        ];
+    fn part_2_works() {
+        let image = Image::new(IMAGE);
+        let answer = sum_distances_between_galaxy_pairs(&image, 10);
 
-        // all empty lines and columns are expanded
+        assert_eq!(answer, 1030);
+    }
+
+    #[test]
+    fn image_can_expand() {
         let expected_lines = vec![
             "....#........",
             ".........#...",
@@ -206,10 +208,54 @@ mod tests {
             "#....#.......",
         ];
 
-        let image = Image::new(&image_lines);
+        let image = Image::new(IMAGE);
         let expected = Image::new(&expected_lines);
 
-        let expanded = image.expand();
+        let expanded = image.expand(2);
+
+        assert_eq!(format!("{:?}", expanded), format!("{:?}", expected));
+    }
+
+    #[test]
+    fn image_can_expand_by_factor() {
+        let factor = 4;
+        let annotated_expected_lines = vec![
+            ". . | 1 2 3 # . | 1 2 3 . . | 1 2 3 .",
+            ". . | 1 2 3 . . | 1 2 3 . # | 1 2 3 .",
+            "# . | 1 2 3 . . | 1 2 3 . . | 1 2 3 .",
+            "- - | 1 2 3 - - | 1 2 3 - - | 1 2 3 -",
+            "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1",
+            "2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2",
+            "3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3",
+            ". . | 1 2 3 . . | 1 2 3 # . | 1 2 3 .",
+            ". # | 1 2 3 . . | 1 2 3 . . | 1 2 3 .",
+            ". . | 1 2 3 . . | 1 2 3 . . | 1 2 3 #",
+            "- - | 1 2 3 - - | 1 2 3 - - | 1 2 3 -",
+            "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1",
+            "2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2",
+            "3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3",
+            ". . | 1 2 3 . . | 1 2 3 . # | 1 2 3 .",
+            "# . | 1 2 3 . # | 1 2 3 . . | 1 2 3 .",
+        ];
+
+        let expected_lines: Vec<String> = annotated_expected_lines
+            .iter()
+            .map(|s| {
+                s.chars()
+                    .filter(|c| !c.is_whitespace())
+                    .map(|c| match c {
+                        '#' => '#',
+                        _ => '.',
+                    })
+                    .collect()
+            })
+            .collect();
+        let expected_lines_ref: Vec<&str> = expected_lines.iter().map(|x| x.as_ref()).collect();
+
+        let image = Image::new(IMAGE);
+        let expected = Image::new(&expected_lines_ref);
+
+        let expanded = image.expand(factor);
 
         assert_eq!(format!("{:?}", expanded), format!("{:?}", expected));
     }
