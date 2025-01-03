@@ -1,0 +1,11 @@
+[package]
+name = "day02"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common = { path = "../common" }
+wgpu = "23.0.1"
+pollster = "0.4.0"
+bytemuck = { version = "1.21.0", features = ["derive"] }
+flume = "0.11.1"
