@@ -39,7 +39,7 @@ fn main() {
 
     let sum_of_safe_reports = result.iter().sum::<u32>();
 
-    println!("Part 1 Sum: {:?}", sum_of_safe_reports);
+    println!("Part 2 Sum: {:?}", sum_of_safe_reports);
 }
 
 fn flatten_reports(reports: Vec<Report>) -> (Vec<u32>, Vec<ReportMetaData>) {
