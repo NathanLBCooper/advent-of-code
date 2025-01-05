@@ -2,7 +2,9 @@ use common::core::AdventError;
 use common::file::read_lines;
 
 fn main() {
-    println!("Part 1 Sum: {:?}", part_one(parse_file().unwrap()));
+    let matrix = parse_file().unwrap();
+    println!("Part 1 Sum: {:?}", part_one(&matrix));
+    println!("Part 2 Sum: {:?}", part_two(&matrix));
 }
 
 fn parse_file() -> Result<Matrix, AdventError> {
@@ -18,11 +20,24 @@ fn parse_line(line: &str) -> Vec<char> {
     line.chars().collect()
 }
 
-fn part_one(matrix: Matrix) -> usize {
+fn part_one(matrix: &Matrix) -> usize {
     let mut matches = 0;
     for y in 0..matrix.size {
         for x in 0..matrix.size {
             matches += search_from((x, y).into(), &matrix);
+        }
+    }
+
+    matches
+}
+
+fn part_two(matrix: &Matrix) -> usize {
+    let mut matches = 0;
+    for y in 0..matrix.size {
+        for x in 0..matrix.size {
+            if search_from_two((x, y).into(), &matrix) {
+                matches += 1;
+            }
         }
     }
 
@@ -54,7 +69,7 @@ fn search_from(start: Vector, matrix: &Matrix) -> usize {
     let mut sum = 0;
     for candidate in candidates {
         let mut success = true;
-        for(i, &c) in WORD[1..].iter().enumerate() {
+        for (i, &c) in WORD[1..].iter().enumerate() {
             let point = candidate.position.clone() + (candidate.direction.clone() * (i as i32 + 1));
 
             if matrix.get(&point) != Some(c) {
@@ -69,6 +84,35 @@ fn search_from(start: Vector, matrix: &Matrix) -> usize {
     }
 
     sum
+}
+
+fn search_from_two(start: Vector, matrix: &Matrix) -> bool {
+    const WORD: [char; 3] = ['M', 'A', 'S'];
+
+    if matrix.get(&start) != Some(WORD[1]) {
+        return false;
+    }
+
+    // /
+    let first: [Vector; 2] = [
+        start.clone() + (-1, 1).into(),
+        start.clone() + (1, -1).into(),
+    ];
+    // \
+    let second: [Vector; 2] = [
+        start.clone() + (-1, -1).into(),
+        start.clone() + (1, 1).into(),
+    ];
+
+    if (matrix.get(&first[0]) == Some(WORD[0]) && matrix.get(&first[1]) == Some(WORD[2])
+        || matrix.get(&first[0]) == Some(WORD[2]) && matrix.get(&first[1]) == Some(WORD[0]))
+        && (matrix.get(&second[0]) == Some(WORD[0]) && matrix.get(&second[1]) == Some(WORD[2])
+            || matrix.get(&second[0]) == Some(WORD[2]) && matrix.get(&second[1]) == Some(WORD[0]))
+    {
+        return true;
+    }
+
+    false
 }
 
 #[derive(Debug)]
